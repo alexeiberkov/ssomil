@@ -1,8 +1,9 @@
 import type { ModelPricing } from './types';
 
-export const openaiGpt4: ModelPricing = {
-  id: 'openai-gpt-4',
-  label: 'OpenAI GPT 4',
+/** OpenAI GPT-4o — prompt caching is automatic; no separate cache-write surcharge. */
+export const openaiGpt4o: ModelPricing = {
+  id: 'openai-gpt-4o',
+  label: 'OpenAI GPT-4o',
   prices: {
     baseInputTokens: 2.5,
     cacheWrites5m: 2.5,

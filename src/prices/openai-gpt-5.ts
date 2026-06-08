@@ -1,13 +1,14 @@
 import type { ModelPricing } from './types';
 
+/** OpenAI GPT-5 — prompt caching is automatic; no separate cache-write surcharge. */
 export const openaiGpt5: ModelPricing = {
   id: 'openai-gpt-5',
-  label: 'OpenAI GPT 5',
+  label: 'OpenAI GPT-5',
   prices: {
-    baseInputTokens: 5.0,
-    cacheWrites5m: 5.0,
-    cacheWrites1h: 5.0,
-    cacheHitsRefreshes: 2.5,
-    outputTokens: 20.0,
+    baseInputTokens: 1.25,
+    cacheWrites5m: 1.25,
+    cacheWrites1h: 1.25,
+    cacheHitsRefreshes: 0.125,
+    outputTokens: 10.0,
   },
 };

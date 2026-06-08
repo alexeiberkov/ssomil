@@ -1,5 +1,5 @@
 import type { TokenPrices } from '../prices/types';
-import { toGbp } from './exchangeRate';
+import { usdToGbp, toGbp } from './exchangeRate';
 import {
   infrastructurePerPageUsd,
   infrastructurePerSubmissionUsd,
@@ -30,15 +30,16 @@ export interface TcoResult {
   perPage: TcoRow;
 }
 
-function makeAmount(usd: number): CurrencyAmount {
-  return { usd, gbp: toGbp(usd) };
-}
-
 function buildRow(
   llmUsd: number,
   infrastructureUsd: number,
   serviceManagementUsd: number,
+  exchangeRate: number,
 ): TcoRow {
+  const makeAmount = (usd: number): CurrencyAmount => ({
+    usd,
+    gbp: toGbp(usd, exchangeRate),
+  });
   const summaryUsd = llmUsd + infrastructureUsd + serviceManagementUsd;
   return {
     llm: makeAmount(llmUsd),
@@ -48,17 +49,22 @@ function buildRow(
   };
 }
 
-export function calculateTco(prices: TokenPrices): TcoResult {
+export function calculateTco(
+  prices: TokenPrices,
+  exchangeRate: number = usdToGbp,
+): TcoResult {
   return {
     perSubmission: buildRow(
       calculateLlmCostUsd(prices),
       infrastructurePerSubmissionUsd,
       serviceManagementPerSubmissionUsd,
+      exchangeRate,
     ),
     perPage: buildRow(
       calculateLlmCostPerPageUsd(prices),
       infrastructurePerPageUsd,
       serviceManagementPerPageUsd,
+      exchangeRate,
     ),
   };
 }

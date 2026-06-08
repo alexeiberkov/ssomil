@@ -18,33 +18,27 @@ body {
 
 .app-layout {
   display: flex;
-  flex-direction: row;
-  min-height: 100vh;
-}
-
-.app-column {
-  display: flex;
   flex-direction: column;
   min-height: 100vh;
 }
 
-.app-column--params {
-  flex: 0 0 70%;
+.app-row {
   min-width: 0;
-  border-right: 2px solid #d0d0d0;
-  background: #fafafa;
 }
 
-.app-column--tco {
-  flex: 0 0 30%;
-  min-width: 0;
+.app-row--params {
+  background: #fafafa;
+  border-bottom: 2px solid #d0d0d0;
+}
+
+.app-row--tco {
+  flex: 1;
   background: #fff;
 }
 
 .panel {
   display: flex;
   flex-direction: column;
-  flex: 1;
   padding: 1rem 1.25rem;
 }
 
@@ -81,6 +75,32 @@ body {
   line-height: 1.4;
 }
 
+.pdf-document-note {
+  margin: 0.5rem 0 0;
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+.pdf-document-note--highlight {
+  padding: 0.6rem 0.75rem;
+  border-left: 3px solid #e87722;
+  background: #fff5ee;
+  color: #333;
+  font-weight: 500;
+}
+
+.pdf-document-llm-list {
+  margin: 0.75rem 0 0;
+  padding-left: 1.25rem;
+  font-size: 13px;
+  line-height: 1.5;
+  color: #333;
+}
+
+.pdf-document-llm-list li + li {
+  margin-top: 0.35rem;
+}
+
 .field select {
   padding: 0.5rem 0.6rem;
   border: 1px solid #ccc;
@@ -88,6 +108,119 @@ body {
   font-size: 14px;
   background: #fff;
   width: 100%;
+  max-width: 24rem;
+}
+
+.exchange-rate {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-size: 14px;
+}
+
+.exchange-rate__prefix {
+  white-space: nowrap;
+}
+
+.exchange-rate__input {
+  width: 5rem;
+  padding: 0.35rem 0.5rem;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 14px;
+  background: #fff;
+  font-variant-numeric: tabular-nums;
+}
+
+.pricing-table-scroll {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.pricing-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+.pricing-table th {
+  background: #e87722;
+  color: #fff;
+  font-weight: 600;
+  text-align: left;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid #d06a1c;
+  white-space: nowrap;
+}
+
+.pricing-table td {
+  padding: 0.5rem 0.75rem;
+  border: 1px solid #ddd;
+  vertical-align: top;
+}
+
+.pricing-table tbody tr:nth-child(odd) {
+  background: #fff;
+}
+
+.pricing-table tbody tr:nth-child(even) {
+  background: #f9f9f9;
+}
+
+.pricing-table__label {
+  font-weight: 500;
+}
+
+.pricing-table__value {
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.stats-table-scroll {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.stats-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+.stats-table td {
+  padding: 0.5rem 0.75rem;
+  border: 1px solid #ddd;
+  vertical-align: top;
+}
+
+.stats-table tbody tr:nth-child(odd) {
+  background: #fff;
+}
+
+.stats-table tbody tr:nth-child(even) {
+  background: #f9f9f9;
+}
+
+.stats-table__label {
+  font-weight: 500;
+}
+
+.stats-table__value {
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  text-align: right;
+  width: 8rem;
+}
+
+.stats-table__input {
+  width: 6rem;
+  padding: 0.35rem 0.5rem;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 13px;
+  background: #fff;
+  font-variant-numeric: tabular-nums;
+  text-align: right;
 }
 
 .tco-tables {
@@ -148,6 +281,37 @@ body {
   white-space: nowrap;
 }
 
+.calculated-value {
+  position: relative;
+  display: inline-block;
+  cursor: help;
+  border-bottom: 1px dotted #888;
+}
+
+.calculated-value.currency-value-pair {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.15rem;
+}
+
+.calculated-value__tooltip {
+  z-index: 1000;
+  min-width: 12rem;
+  max-width: min(28rem, calc(100vw - 16px));
+  padding: 0.5rem 0.65rem;
+  border-radius: 4px;
+  background: #1a1a1a;
+  color: #fff;
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 1.4;
+  white-space: normal;
+  text-align: left;
+  pointer-events: none;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  word-break: break-word;
+}
+
 .currency-value-pair {
   display: inline-flex;
   align-items: baseline;
@@ -195,26 +359,6 @@ body {
 
 .tco-block--page .tco-card__values {
   background: #fff5ee;
-}
-
-@media (max-width: 768px) {
-  .app-layout {
-    flex-direction: column;
-  }
-
-  .app-column {
-    min-height: auto;
-  }
-
-  .app-column--params,
-  .app-column--tco {
-    flex: none;
-  }
-
-  .app-column--params {
-    border-right: none;
-    border-bottom: 2px solid #d0d0d0;
-  }
 }
 
 @media (max-width: 640px) {
