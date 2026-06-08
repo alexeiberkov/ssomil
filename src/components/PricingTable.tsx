@@ -1,4 +1,7 @@
-import { formatDecimal, formatDecimalTrimmed } from '../formulas/format';
+import {
+  formatDecimalTrimmed,
+  formatUsd as formatUsdAmount,
+} from '../formulas/format';
 import {
   perMillionUsdTooltip,
   perTokenUsdTooltip,
@@ -10,7 +13,7 @@ import { CalculatedValue } from './CalculatedValue';
 const MILLION = 1_000_000;
 
 function formatUsdPerMillion(value: number): string {
-  return `$${formatDecimal(value)}`;
+  return formatUsdAmount(value);
 }
 
 function formatUsdPerToken(valuePerMillion: number): string {

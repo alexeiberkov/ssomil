@@ -1,60 +1,74 @@
-import type { TokenPrices } from '../../prices/types';
-import { formatDecimal, formatGrouped, namedField } from '../format';
 import {
-  infrastructurePerPageUsd,
-  infrastructurePerSubmissionUsd,
+  calculateInfrastructureCostTotal,
+} from '../../content/infrastructureCost';
+import type { DocumentStatisticsResult } from '../documentStatistics';
+import { formatDecimal, formatGrouped, formatUsd, namedField } from '../format';
+import {
+  calculateInfrastructurePerPageUsd,
+  calculateInfrastructurePerSubmissionUsd,
 } from '../infrastructureCost';
-import { calculateLlmCostPerPageUsd, calculateLlmCostUsd } from '../llmCost';
+import type { LlmCalculationsResult } from '../llmCalculations';
 import {
-  serviceManagementPerPageUsd,
+  finalCostUsdTooltip,
+} from './llmCalculationsTooltips';
+import {
+  calculateSupportOnlyFeePerPageUsd,
   serviceManagementPerSubmissionUsd,
+  supportOnlyFeeMonthlyUsd,
 } from '../serviceManagementCost';
-import { pagesPerSubmission, tokensPerSubmission } from '../tokenUsage';
 
-const MILLION = 1_000_000;
-
-const tokenFieldNames: Record<keyof typeof tokensPerSubmission, string> = {
-  baseInputTokens: 'Base Input Tokens',
-  cacheWrites5m: '5m Cache Writes',
-  cacheWrites1h: '1h Cache Writes',
-  cacheHitsRefreshes: 'Cache Hits & Refreshes',
-  outputTokens: 'Output Tokens',
-};
-
-function tokenCostTerm(
-  fieldName: string,
-  tokenCount: number,
-  pricePerMillion: number,
+export function llmPageUsdTooltip(
+  llmPerSubmissionUsd: number,
+  stats: DocumentStatisticsResult,
 ): string {
-  return `${namedField(fieldName, formatGrouped(tokenCount))} × ${namedField(`${fieldName} price`, `${formatDecimal(pricePerMillion)} USD / ${formatGrouped(MILLION)}`)}`;
+  return `${namedField('LLM costs (per submission)', `${formatDecimal(llmPerSubmissionUsd, 4)} USD`)} / ${namedField('One submission contains aprx. pages', stats.pagesPerSubmission)}`;
 }
 
-export function llmSubmissionUsdTooltip(prices: TokenPrices): string {
-  const usage = tokensPerSubmission;
-  return (Object.keys(usage) as (keyof typeof tokensPerSubmission)[])
-    .map((key) => tokenCostTerm(tokenFieldNames[key], usage[key], prices[key]))
-    .join(' + ');
+export function llmGbpTooltip(
+  llmUsd: number,
+  exchangeRate: number,
+  variant: 'submission' | 'page',
+): string {
+  const label =
+    variant === 'submission'
+      ? 'LLM costs (per submission)'
+      : 'LLM cost (per page)';
+  return `${namedField(label, `${formatDecimal(llmUsd, 4)} USD`)} × ${namedField('Exchange rate', exchangeRate)}`;
 }
 
-export function llmPageUsdTooltip(prices: TokenPrices): string {
-  const submissionCost = calculateLlmCostUsd(prices);
-  return `${namedField('LLM costs (per submission)', `${formatDecimal(submissionCost, 4)} USD`)} / ${namedField('One submission contains aprx. pages', pagesPerSubmission)}`;
+export function infrastructureSubmissionUsdTooltip(
+  stats: DocumentStatisticsResult,
+  computeResourcePages: number,
+): string {
+  const infrastructurePerPage = calculateInfrastructurePerPageUsd(computeResourcePages);
+  return `${namedField('Infrastructure Costs (per page)', `${formatDecimal(infrastructurePerPage, 4)} USD`)} × ${namedField('One submission contains aprx. pages', stats.pagesPerSubmission)}`;
 }
 
-export function infrastructureSubmissionUsdTooltip(): string {
-  return `${namedField('Infrastructure Costs (per submission)', 'fixed rate')} = ${formatDecimal(infrastructurePerSubmissionUsd, 4)} USD`;
+export function infrastructureGbpTooltip(
+  infrastructureUsd: number,
+  exchangeRate: number,
+  variant: 'submission' | 'page',
+): string {
+  const label =
+    variant === 'submission'
+      ? 'Infrastructure Costs (per submission)'
+      : 'Infrastructure Costs (per page)';
+  return `${namedField(label, `${formatDecimal(infrastructureUsd, 4)} USD`)} × ${namedField('Exchange rate', exchangeRate)}`;
 }
 
-export function infrastructurePageUsdTooltip(): string {
-  return `${namedField('Infrastructure Costs (per page)', 'fixed rate')} = ${formatDecimal(infrastructurePerPageUsd, 4)} USD`;
+export function infrastructurePageUsdTooltip(computeResourcePages: number): string {
+  const total = calculateInfrastructureCostTotal();
+  return `${namedField('[Prod] Cost per month (Saving plan) Total Price', formatUsd(total.prodSavingPlan))} / ${namedField('Compute resource pages', formatGrouped(computeResourcePages))}`;
 }
 
 export function serviceManagementSubmissionUsdTooltip(): string {
-  return `${namedField('Service management and CR fee (per submission)', 'fixed rate')} = ${formatDecimal(serviceManagementPerSubmissionUsd, 4)} USD`;
+  return `${namedField('Support only fee (per submission)', 'fixed rate')} = ${formatDecimal(serviceManagementPerSubmissionUsd, 4)} USD`;
 }
 
-export function serviceManagementPageUsdTooltip(): string {
-  return `${namedField('Service management and CR fee (per page)', 'fixed rate')} = ${formatDecimal(serviceManagementPerPageUsd, 4)} USD`;
+export function serviceManagementPageUsdTooltip(
+  stats: DocumentStatisticsResult,
+): string {
+  return `${namedField('Support only fee monthly budget', `${formatDecimal(supportOnlyFeeMonthlyUsd, 2)} USD`)} / (${namedField('Average number of submissions (monthly)', stats.averageSubmissionsMonthly)} × ${namedField('One submission contains aprx. pages', stats.pagesPerSubmission)})`;
 }
 
 export function summaryUsdTooltip(
@@ -63,46 +77,82 @@ export function summaryUsdTooltip(
   serviceManagementUsd: number,
   variant: 'submission' | 'page',
 ): string {
-  const suffix = variant === 'submission' ? '(per submission)' : '(per page)';
+  if (variant === 'page') {
+    return [
+      namedField('LLM cost', `${formatDecimal(llmUsd, 4)} USD`),
+      namedField('Infrastructure Costs', `${formatDecimal(infrastructureUsd, 4)} USD`),
+      namedField('Support only fee', `${formatDecimal(serviceManagementUsd, 4)} USD`),
+    ].join(' + ');
+  }
+
   return [
-    namedField(`LLM costs ${suffix}`, `${formatDecimal(llmUsd, 4)} USD`),
-    namedField(`Infrastructure Costs ${suffix}`, `${formatDecimal(infrastructureUsd, 4)} USD`),
-    namedField(`Service management and CR fee ${suffix}`, `${formatDecimal(serviceManagementUsd, 4)} USD`),
+    namedField('LLM costs (per submission)', `${formatDecimal(llmUsd, 4)} USD`),
+    namedField('Infrastructure Costs (per submission)', `${formatDecimal(infrastructureUsd, 4)} USD`),
+    namedField('Support only fee (per submission)', `${formatDecimal(serviceManagementUsd, 4)} USD`),
   ].join(' + ');
 }
 
 export function gbpTooltip(usd: number, exchangeRate: number): string {
-  return `${namedField('USD amount', `${formatDecimal(usd, 4)} USD`)} × ${namedField('Exchange rate', exchangeRate)} = ${formatDecimal(usd * exchangeRate, 4)} GBP`;
+  return `${namedField('USD amount', `${formatDecimal(usd, 4)} USD`)} × ${namedField('Exchange rate', exchangeRate)}`;
+}
+
+export function supportOnlyFeeGbpTooltip(
+  supportOnlyFeeUsd: number,
+  exchangeRate: number,
+  variant: 'submission' | 'page',
+): string {
+  const label = variant === 'page' ? 'Support only fee' : 'Support only fee (per submission)';
+  return `${namedField(label, `${formatDecimal(supportOnlyFeeUsd, 4)} USD`)} × ${namedField('Exchange rate', exchangeRate)}`;
+}
+
+export function summaryGbpTooltip(
+  summaryUsd: number,
+  exchangeRate: number,
+  variant: 'submission' | 'page',
+): string {
+  const label = variant === 'page' ? 'Summary' : 'Summary (per submission)';
+  return `${namedField(label, `${formatDecimal(summaryUsd, 4)} USD`)} × ${namedField('Exchange rate', exchangeRate)}`;
 }
 
 export type TcoMetric = 'llm' | 'infrastructure' | 'serviceManagement' | 'summary';
 export type TcoVariant = 'submission' | 'page';
 
 interface TcoTooltipContext {
-  prices: TokenPrices;
+  stats: DocumentStatisticsResult;
+  llmCalculations: LlmCalculationsResult;
+  computeResourcePages: number;
   variant: TcoVariant;
   metric: TcoMetric;
   llmUsd: number;
   infrastructureUsd: number;
   serviceManagementUsd: number;
+  exchangeRate: number;
 }
 
 function usdTooltipForMetric(ctx: TcoTooltipContext): string {
-  const { prices, variant, metric, llmUsd, infrastructureUsd, serviceManagementUsd } = ctx;
+  const {
+    stats,
+    llmCalculations,
+    variant,
+    metric,
+    llmUsd,
+    infrastructureUsd,
+    serviceManagementUsd,
+  } = ctx;
 
   switch (metric) {
     case 'llm':
       return variant === 'submission'
-        ? llmSubmissionUsdTooltip(prices)
-        : llmPageUsdTooltip(prices);
+        ? finalCostUsdTooltip(llmCalculations)
+        : llmPageUsdTooltip(llmCalculations.finalCostPerSubmissionUsd, stats);
     case 'infrastructure':
       return variant === 'submission'
-        ? infrastructureSubmissionUsdTooltip()
-        : infrastructurePageUsdTooltip();
+        ? infrastructureSubmissionUsdTooltip(stats, ctx.computeResourcePages)
+        : infrastructurePageUsdTooltip(ctx.computeResourcePages);
     case 'serviceManagement':
       return variant === 'submission'
         ? serviceManagementSubmissionUsdTooltip()
-        : serviceManagementPageUsdTooltip();
+        : serviceManagementPageUsdTooltip(stats);
     case 'summary':
       return summaryUsdTooltip(llmUsd, infrastructureUsd, serviceManagementUsd, variant);
   }
@@ -112,23 +162,65 @@ export function tcoUsdTooltip(ctx: TcoTooltipContext): string {
   return usdTooltipForMetric(ctx);
 }
 
-export function tcoGbpTooltip(usd: number, exchangeRate: number): string {
-  return gbpTooltip(usd, exchangeRate);
+export function tcoGbpTooltip(ctx: TcoTooltipContext): string {
+  const {
+    metric,
+    variant,
+    exchangeRate,
+    llmUsd,
+    infrastructureUsd,
+    serviceManagementUsd,
+  } = ctx;
+
+  if (metric === 'llm') {
+    return llmGbpTooltip(llmUsd, exchangeRate, variant);
+  }
+
+  if (metric === 'infrastructure') {
+    return infrastructureGbpTooltip(infrastructureUsd, exchangeRate, variant);
+  }
+
+  if (metric === 'serviceManagement') {
+    return supportOnlyFeeGbpTooltip(serviceManagementUsd, exchangeRate, variant);
+  }
+
+  if (metric === 'summary') {
+    return summaryGbpTooltip(
+      llmUsd + infrastructureUsd + serviceManagementUsd,
+      exchangeRate,
+      variant,
+    );
+  }
+
+  return gbpTooltip(0, exchangeRate);
 }
 
-export function getTcoRowAmounts(variant: TcoVariant, prices: TokenPrices) {
+export function getTcoRowAmounts(
+  variant: TcoVariant,
+  stats: DocumentStatisticsResult,
+  llmCalculations: LlmCalculationsResult,
+  computeResourcePages: number,
+) {
   const llmUsd =
     variant === 'submission'
-      ? calculateLlmCostUsd(prices)
-      : calculateLlmCostPerPageUsd(prices);
+      ? llmCalculations.finalCostPerSubmissionUsd
+      : stats.pagesPerSubmission > 0
+        ? llmCalculations.finalCostPerSubmissionUsd / stats.pagesPerSubmission
+        : 0;
   const infrastructureUsd =
     variant === 'submission'
-      ? infrastructurePerSubmissionUsd
-      : infrastructurePerPageUsd;
+      ? calculateInfrastructurePerSubmissionUsd(
+          stats.pagesPerSubmission,
+          computeResourcePages,
+        )
+      : calculateInfrastructurePerPageUsd(computeResourcePages);
   const serviceManagementUsd =
     variant === 'submission'
       ? serviceManagementPerSubmissionUsd
-      : serviceManagementPerPageUsd;
+      : calculateSupportOnlyFeePerPageUsd(
+          stats.averageSubmissionsMonthly,
+          stats.pagesPerSubmission,
+        );
 
   return { llmUsd, infrastructureUsd, serviceManagementUsd };
 }

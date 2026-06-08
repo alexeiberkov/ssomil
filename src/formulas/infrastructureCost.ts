@@ -1,5 +1,17 @@
-/** Fixed infrastructure cost per submission (USD). */
-export const infrastructurePerSubmissionUsd = 0.2167;
+import {
+  calculateAvgInfrastructureCostPerPage,
+  defaultComputeResourcePages,
+} from '../content/infrastructureCost';
 
-/** Fixed infrastructure cost per page (USD). */
-export const infrastructurePerPageUsd = 0.0036;
+export function calculateInfrastructurePerPageUsd(
+  computeResourcePages: number = defaultComputeResourcePages,
+): number {
+  return calculateAvgInfrastructureCostPerPage(computeResourcePages).prodSavingPlan;
+}
+
+export function calculateInfrastructurePerSubmissionUsd(
+  pagesPerSubmission: number,
+  computeResourcePages: number = defaultComputeResourcePages,
+): number {
+  return calculateInfrastructurePerPageUsd(computeResourcePages) * pagesPerSubmission;
+}

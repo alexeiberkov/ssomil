@@ -1,4 +1,7 @@
 import type { CurrencyAmount, TcoResult, TcoRow } from '../formulas/tco';
+import type { DocumentStatisticsResult } from '../formulas/documentStatistics';
+import { formatDecimal } from '../formulas/format';
+import type { LlmCalculationsResult } from '../formulas/llmCalculations';
 import {
   getTcoRowAmounts,
   tcoGbpTooltip,
@@ -6,12 +9,13 @@ import {
   type TcoMetric,
   type TcoVariant,
 } from '../formulas/tooltips/tcoTooltips';
-import type { TokenPrices } from '../prices/types';
 import { CalculatedValue } from './CalculatedValue';
 
 interface TcoTableProps {
   tco: TcoResult;
-  prices: TokenPrices;
+  stats: DocumentStatisticsResult;
+  llmCalculations: LlmCalculationsResult;
+  computeResourcePages: number;
   exchangeRate: number;
 }
 
@@ -21,7 +25,7 @@ interface TcoColumn {
 }
 
 function formatCurrency(value: number): string {
-  return value.toFixed(4);
+  return formatDecimal(value, 4);
 }
 
 function CurrencyValue({
@@ -48,36 +52,50 @@ function CurrencyValue({
 }
 
 function TcoBlock({
+  title,
   columns,
   row,
   variant,
-  prices,
+  stats,
+  llmCalculations,
+  computeResourcePages,
   exchangeRate,
 }: {
+  title: string;
   columns: TcoColumn[];
   row: TcoRow;
   variant: TcoVariant;
-  prices: TokenPrices;
+  stats: DocumentStatisticsResult;
+  llmCalculations: LlmCalculationsResult;
+  computeResourcePages: number;
   exchangeRate: number;
 }) {
-  const amounts = getTcoRowAmounts(variant, prices);
+  const amounts = getTcoRowAmounts(
+    variant,
+    stats,
+    llmCalculations,
+    computeResourcePages,
+  );
 
   const tooltipContext = {
-    prices,
+    stats,
+    llmCalculations,
+    computeResourcePages,
     variant,
+    exchangeRate,
     ...amounts,
   };
 
   const tooltipFor = (metric: TcoMetric, currency: 'usd' | 'gbp') => {
-    const amount = row[metric];
     if (currency === 'usd') {
       return tcoUsdTooltip({ ...tooltipContext, metric });
     }
-    return tcoGbpTooltip(amount.usd, exchangeRate);
+    return tcoGbpTooltip({ ...tooltipContext, metric });
   };
 
   return (
     <div className={`tco-block tco-block--${variant}`}>
+      <h3 className="tco-block__title">{title}</h3>
       <div className="tco-table-scroll">
         <table className="tco-table">
           <thead>
@@ -141,36 +159,48 @@ function TcoBlock({
 }
 
 const submissionColumns: TcoColumn[] = [
-  { key: 'llm', label: 'LLM costs (per submission)' },
-  { key: 'infrastructure', label: 'Infrastructure Costs (per submission)' },
-  { key: 'serviceManagement', label: 'Service management and CR fee (per submission)' },
-  { key: 'summary', label: 'Summary (per submission)' },
+  { key: 'llm', label: 'LLM costs' },
+  { key: 'infrastructure', label: 'Infrastructure Costs' },
+  { key: 'serviceManagement', label: 'Support only fee' },
+  { key: 'summary', label: 'Summary' },
 ];
 
 const pageColumns: TcoColumn[] = [
-  { key: 'llm', label: 'LLM cost (per page)' },
-  { key: 'infrastructure', label: 'Infrastructure Costs (per page)' },
-  { key: 'serviceManagement', label: 'Service management and CR fee (per page)' },
-  { key: 'summary', label: 'Summary (per page)' },
+  { key: 'llm', label: 'LLM cost' },
+  { key: 'infrastructure', label: 'Infrastructure Costs' },
+  { key: 'serviceManagement', label: 'Support only fee' },
+  { key: 'summary', label: 'Summary' },
 ];
 
-export function TcoTable({ tco, prices, exchangeRate }: TcoTableProps) {
+export function TcoTable({
+  tco,
+  stats,
+  llmCalculations,
+  computeResourcePages,
+  exchangeRate,
+}: TcoTableProps) {
   return (
     <section className="panel tco-panel">
       <h2>TCO</h2>
       <div className="tco-tables">
         <TcoBlock
+          title="Per submission"
           columns={submissionColumns}
           row={tco.perSubmission}
           variant="submission"
-          prices={prices}
+          stats={stats}
+          llmCalculations={llmCalculations}
+          computeResourcePages={computeResourcePages}
           exchangeRate={exchangeRate}
         />
         <TcoBlock
+          title="Per page"
           columns={pageColumns}
           row={tco.perPage}
           variant="page"
-          prices={prices}
+          stats={stats}
+          llmCalculations={llmCalculations}
+          computeResourcePages={computeResourcePages}
           exchangeRate={exchangeRate}
         />
       </div>

@@ -1,5 +1,6 @@
 import type { DocumentStatisticsResult } from '../formulas/documentStatistics';
 import type { LlmCalculationsResult } from '../formulas/llmCalculations';
+import { formatGbp, formatUsd } from '../formulas/format';
 import {
   avgInputPromptsCostTooltip,
   avgOutputPromptsCostTooltip,
@@ -18,14 +19,6 @@ interface LlmCalculationsTableProps {
   prices: TokenPrices;
   exchangeRate: number;
   calculations: LlmCalculationsResult;
-}
-
-function formatUsd(value: number): string {
-  return `$${value.toFixed(2)}`;
-}
-
-function formatGbp(value: number): string {
-  return `£${value.toFixed(2)}`;
 }
 
 function CalcRow({

@@ -1,15 +1,13 @@
 import type { TokenPrices } from '../prices/types';
+import type { DocumentStatisticsResult } from './documentStatistics';
 import { usdToGbp, toGbp } from './exchangeRate';
 import {
-  infrastructurePerPageUsd,
-  infrastructurePerSubmissionUsd,
+  calculateInfrastructurePerPageUsd,
+  calculateInfrastructurePerSubmissionUsd,
 } from './infrastructureCost';
+import { calculateLlmCalculations } from './llmCalculations';
 import {
-  calculateLlmCostPerPageUsd,
-  calculateLlmCostUsd,
-} from './llmCost';
-import {
-  serviceManagementPerPageUsd,
+  calculateSupportOnlyFeePerPageUsd,
   serviceManagementPerSubmissionUsd,
 } from './serviceManagementCost';
 
@@ -50,20 +48,42 @@ function buildRow(
 }
 
 export function calculateTco(
+  stats: DocumentStatisticsResult,
   prices: TokenPrices,
   exchangeRate: number = usdToGbp,
+  computeResourcePages: number,
 ): TcoResult {
+  const llm = calculateLlmCalculations(stats, prices, exchangeRate);
+  const llmPerSubmissionUsd = llm.finalCostPerSubmissionUsd;
+  const llmPerPageUsd =
+    stats.pagesPerSubmission > 0
+      ? llmPerSubmissionUsd / stats.pagesPerSubmission
+      : 0;
+
+  const infrastructurePerPageUsd = calculateInfrastructurePerPageUsd(
+    computeResourcePages,
+  );
+  const infrastructurePerSubmissionUsd = calculateInfrastructurePerSubmissionUsd(
+    stats.pagesPerSubmission,
+    computeResourcePages,
+  );
+
+  const supportOnlyFeePerPageUsd = calculateSupportOnlyFeePerPageUsd(
+    stats.averageSubmissionsMonthly,
+    stats.pagesPerSubmission,
+  );
+
   return {
     perSubmission: buildRow(
-      calculateLlmCostUsd(prices),
+      llmPerSubmissionUsd,
       infrastructurePerSubmissionUsd,
       serviceManagementPerSubmissionUsd,
       exchangeRate,
     ),
     perPage: buildRow(
-      calculateLlmCostPerPageUsd(prices),
+      llmPerPageUsd,
       infrastructurePerPageUsd,
-      serviceManagementPerPageUsd,
+      supportOnlyFeePerPageUsd,
       exchangeRate,
     ),
   };

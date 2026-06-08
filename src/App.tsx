@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react';
+import { InfrastructureCostTable } from './components/InfrastructureCostTable';
 import { ParamsPanel } from './components/ParamsPanel';
 import { TcoTable } from './components/TcoTable';
 import {
@@ -7,14 +8,19 @@ import {
   type DocumentStatisticsInputs,
 } from './formulas/documentStatistics';
 import { usdToGbp } from './formulas/exchangeRate';
+import { calculateLlmCalculations } from './formulas/llmCalculations';
 import { calculateTco } from './formulas/tco';
 import { defaultModelId, getModelById } from './prices';
+import { defaultComputeResourcePages } from './content/infrastructureCost';
 
 export default function App() {
   const [modelId, setModelId] = useState(defaultModelId);
   const [exchangeRate, setExchangeRate] = useState(usdToGbp);
   const [documentStatisticsInputs, setDocumentStatisticsInputs] = useState(
     defaultDocumentStatisticsInputs,
+  );
+  const [computeResourcePages, setComputeResourcePages] = useState(
+    defaultComputeResourcePages,
   );
 
   const model = useMemo(() => getModelById(modelId), [modelId]);
@@ -24,9 +30,20 @@ export default function App() {
     [documentStatisticsInputs],
   );
 
+  const llmCalculations = useMemo(
+    () => calculateLlmCalculations(documentStatistics, model.prices, exchangeRate),
+    [documentStatistics, model, exchangeRate],
+  );
+
   const tco = useMemo(
-    () => calculateTco(model.prices, exchangeRate),
-    [model, exchangeRate],
+    () =>
+      calculateTco(
+        documentStatistics,
+        model.prices,
+        exchangeRate,
+        computeResourcePages,
+      ),
+    [documentStatistics, model, exchangeRate, computeResourcePages],
   );
 
   const handleDocumentStatisticsInputChange = <K extends keyof DocumentStatisticsInputs>(
@@ -50,8 +67,20 @@ export default function App() {
             onDocumentStatisticsInputChange={handleDocumentStatisticsInputChange}
           />
         </section>
+        <section className="app-row app-row--infra">
+          <InfrastructureCostTable
+            computeResourcePages={computeResourcePages}
+            onComputeResourcePagesChange={setComputeResourcePages}
+          />
+        </section>
         <section className="app-row app-row--tco">
-          <TcoTable tco={tco} prices={model.prices} exchangeRate={exchangeRate} />
+          <TcoTable
+            tco={tco}
+            stats={documentStatistics}
+            llmCalculations={llmCalculations}
+            computeResourcePages={computeResourcePages}
+            exchangeRate={exchangeRate}
+          />
         </section>
       </main>
     </div>

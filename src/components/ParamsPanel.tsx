@@ -7,6 +7,7 @@ import { getModelById } from '../prices';
 import { DocumentStatisticsTable } from './DocumentStatisticsTable';
 import { ExchangeRateField } from './ExchangeRateField';
 import { LlmCalculationsTable } from './LlmCalculationsTable';
+import { LlmCachingInfo } from './LlmCachingInfo';
 import { ModelSelector } from './ModelSelector';
 import { PdfDocumentField } from './PdfDocumentField';
 import { PricingTable } from './PricingTable';
@@ -57,6 +58,7 @@ export function ParamsPanel({
         <ReadOnlyField label="File name" value="ACO0000877018.pdf" />
         <PdfDocumentField />
         <ModelSelector value={modelId} onChange={onModelChange} />
+        <LlmCachingInfo modelId={modelId} />
         <PricingTable prices={model.prices} />
         <DocumentStatisticsTable
           inputs={documentStatisticsInputs}

@@ -2,6 +2,7 @@ import type {
   DocumentStatisticsInputs,
   DocumentStatisticsResult,
 } from '../formulas/documentStatistics';
+import { formatDisplayValue } from '../formulas/format';
 import {
   averageSubmissionsAnnuallyTooltip,
   inputTokenForCachingPdfTooltip,
@@ -50,7 +51,7 @@ function StatValue({
   value: number;
   tooltip?: string;
 }) {
-  const display = Number.isInteger(value) ? value : value.toFixed(2);
+  const display = formatDisplayValue(value);
 
   if (!tooltip) {
     return <>{display}</>;
