@@ -1,4 +1,5 @@
 import {
+  getInfrastructureCostColumnLabel,
   infrastructureCostRows,
   type InfrastructureCostColumnKey,
   type InfrastructureCostRow,
@@ -19,15 +20,12 @@ export function avgInfrastructureCostPerPageTooltip(
   totalValue: number,
   computeResourcePages: number,
 ): string {
-  const totalLabel =
-    columnKey === 'combinedSavingPlan'
-      ? '[Prod]+[Dev/QA/UAT] Cost per month (Saving plan)'
-      : 'Total Price';
+  const totalLabel = `${getInfrastructureCostColumnLabel(columnKey)} Total Price`;
 
   if (columnKey === 'combinedSavingPlan') {
     const pages = namedField('Compute resource pages', formatGrouped(computeResourcePages));
     return `${namedField(totalLabel, formatUsd(totalValue))} / (${pages} + 10% × ${pages})`;
   }
 
-  return `${namedField('Total Price', formatUsd(totalValue))} / ${namedField('Compute resource pages', formatGrouped(computeResourcePages))}`;
+  return `${namedField(totalLabel, formatUsd(totalValue))} / ${namedField('Compute resource pages', formatGrouped(computeResourcePages))}`;
 }

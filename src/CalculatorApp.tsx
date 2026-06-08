@@ -11,7 +11,7 @@ import { usdToGbp } from './formulas/exchangeRate';
 import { calculateLlmCalculations } from './formulas/llmCalculations';
 import { calculateTco } from './formulas/tco';
 import { defaultModelId, getModelById } from './prices';
-import { defaultComputeResourcePages } from './content/infrastructureCost';
+import { defaultComputeResourcePages, defaultInfrastructureCostColumnKey } from './content/infrastructureCost';
 
 export function CalculatorApp() {
   const [modelId, setModelId] = useState(defaultModelId);
@@ -21,6 +21,9 @@ export function CalculatorApp() {
   );
   const [computeResourcePages, setComputeResourcePages] = useState(
     defaultComputeResourcePages,
+  );
+  const [infrastructureColumnKey, setInfrastructureColumnKey] = useState(
+    defaultInfrastructureCostColumnKey,
   );
 
   const model = useMemo(() => getModelById(modelId), [modelId]);
@@ -42,8 +45,9 @@ export function CalculatorApp() {
         model.prices,
         exchangeRate,
         computeResourcePages,
+        infrastructureColumnKey,
       ),
-    [documentStatistics, model, exchangeRate, computeResourcePages],
+    [documentStatistics, model, exchangeRate, computeResourcePages, infrastructureColumnKey],
   );
 
   const handleDocumentStatisticsInputChange = <K extends keyof DocumentStatisticsInputs>(
@@ -71,6 +75,8 @@ export function CalculatorApp() {
           <InfrastructureCostTable
             computeResourcePages={computeResourcePages}
             onComputeResourcePagesChange={setComputeResourcePages}
+            selectedColumnKey={infrastructureColumnKey}
+            onSelectedColumnKeyChange={setInfrastructureColumnKey}
           />
         </section>
         <section className="app-row app-row--tco">
@@ -79,6 +85,7 @@ export function CalculatorApp() {
             stats={documentStatistics}
             llmCalculations={llmCalculations}
             computeResourcePages={computeResourcePages}
+            infrastructureColumnKey={infrastructureColumnKey}
             exchangeRate={exchangeRate}
           />
         </section>

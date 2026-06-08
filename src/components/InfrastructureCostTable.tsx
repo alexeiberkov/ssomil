@@ -69,12 +69,22 @@ function AvgCostCell({
   );
 }
 
-function DataRow({ row }: { row: InfrastructureCostRow }) {
+function DataRow({
+  row,
+  selectedColumnKey,
+}: {
+  row: InfrastructureCostRow;
+  selectedColumnKey: InfrastructureCostColumnKey;
+}) {
   return (
     <tr>
       <td className="infra-table__service">{row.service}</td>
       {infrastructureCostColumns.map((col) => (
-        <CostCell key={col.key} value={row[col.key]} highlight={col.highlight} />
+        <CostCell
+          key={col.key}
+          value={row[col.key]}
+          highlight={selectedColumnKey === col.key}
+        />
       ))}
     </tr>
   );
@@ -83,13 +93,16 @@ function DataRow({ row }: { row: InfrastructureCostRow }) {
 interface InfrastructureCostTableProps {
   computeResourcePages: number;
   onComputeResourcePagesChange: (value: number) => void;
+  selectedColumnKey: InfrastructureCostColumnKey;
+  onSelectedColumnKeyChange: (columnKey: InfrastructureCostColumnKey) => void;
 }
 
 export function InfrastructureCostTable({
   computeResourcePages,
   onComputeResourcePagesChange,
+  selectedColumnKey,
+  onSelectedColumnKeyChange,
 }: InfrastructureCostTableProps) {
-
   const total = useMemo(() => calculateInfrastructureCostTotal(), []);
 
   const avgPerPage = useMemo(
@@ -128,16 +141,33 @@ export function InfrastructureCostTable({
               {infrastructureCostColumns.map((col) => (
                 <th
                   key={col.key}
-                  className={col.highlight ? 'infra-table__header--highlight' : undefined}
+                  className={
+                    selectedColumnKey === col.key
+                      ? 'infra-table__header--selected'
+                      : undefined
+                  }
                 >
-                  {col.label}
+                  <label className="infra-table__header-label">
+                    <input
+                      type="radio"
+                      name="infra-cost-column"
+                      className="infra-table__header-radio"
+                      checked={selectedColumnKey === col.key}
+                      onChange={() => onSelectedColumnKeyChange(col.key)}
+                    />
+                    <span>{col.label}</span>
+                  </label>
                 </th>
               ))}
             </tr>
           </thead>
           <tbody>
             {infrastructureCostRows.map((row) => (
-              <DataRow key={row.service} row={row} />
+              <DataRow
+                key={row.service}
+                row={row}
+                selectedColumnKey={selectedColumnKey}
+              />
             ))}
             <tr className="infra-table__total-row">
               <td className="infra-table__service">{total.service}</td>
@@ -146,7 +176,7 @@ export function InfrastructureCostTable({
                   key={col.key}
                   value={total[col.key]}
                   columnKey={col.key}
-                  highlight={col.highlight}
+                  highlight={selectedColumnKey === col.key}
                 />
               ))}
             </tr>
@@ -159,7 +189,7 @@ export function InfrastructureCostTable({
                   columnKey={col.key}
                   totalValue={total[col.key]}
                   computeResourcePages={computeResourcePages}
-                  highlight={col.highlight}
+                  highlight={selectedColumnKey === col.key}
                 />
               ))}
             </tr>

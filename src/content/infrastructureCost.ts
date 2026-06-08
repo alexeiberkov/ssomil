@@ -16,6 +16,18 @@ export interface InfrastructureCostRow {
 
 export type InfrastructureCostColumnKey = keyof Omit<InfrastructureCostRow, 'service'>;
 
+export const defaultInfrastructureCostColumnKey: InfrastructureCostColumnKey =
+  'prodSavingPlan';
+
+export function getInfrastructureCostColumnLabel(
+  columnKey: InfrastructureCostColumnKey,
+): string {
+  return (
+    infrastructureCostColumns.find((column) => column.key === columnKey)?.label ??
+    columnKey
+  );
+}
+
 export const infrastructureCostRows: InfrastructureCostRow[] = [
   {
     service: 'Azure Kubernetes Service (AKS 2 nodes)',
@@ -91,7 +103,6 @@ export const infrastructureCostColumns = [
   {
     key: 'combinedSavingPlan' as const,
     label: '[Prod]+[Dev/QA/UAT] Cost per month (Saving plan)',
-    highlight: true,
   },
 ];
 

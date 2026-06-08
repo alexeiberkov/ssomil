@@ -1,4 +1,5 @@
 import type { CurrencyAmount, TcoResult, TcoRow } from '../formulas/tco';
+import type { InfrastructureCostColumnKey } from '../content/infrastructureCost';
 import type { DocumentStatisticsResult } from '../formulas/documentStatistics';
 import { formatDecimal } from '../formulas/format';
 import type { LlmCalculationsResult } from '../formulas/llmCalculations';
@@ -16,6 +17,7 @@ interface TcoTableProps {
   stats: DocumentStatisticsResult;
   llmCalculations: LlmCalculationsResult;
   computeResourcePages: number;
+  infrastructureColumnKey: InfrastructureCostColumnKey;
   exchangeRate: number;
 }
 
@@ -59,6 +61,7 @@ function TcoBlock({
   stats,
   llmCalculations,
   computeResourcePages,
+  infrastructureColumnKey,
   exchangeRate,
 }: {
   title: string;
@@ -68,6 +71,7 @@ function TcoBlock({
   stats: DocumentStatisticsResult;
   llmCalculations: LlmCalculationsResult;
   computeResourcePages: number;
+  infrastructureColumnKey: InfrastructureCostColumnKey;
   exchangeRate: number;
 }) {
   const amounts = getTcoRowAmounts(
@@ -75,12 +79,14 @@ function TcoBlock({
     stats,
     llmCalculations,
     computeResourcePages,
+    infrastructureColumnKey,
   );
 
   const tooltipContext = {
     stats,
     llmCalculations,
     computeResourcePages,
+    infrastructureColumnKey,
     variant,
     exchangeRate,
     ...amounts,
@@ -177,6 +183,7 @@ export function TcoTable({
   stats,
   llmCalculations,
   computeResourcePages,
+  infrastructureColumnKey,
   exchangeRate,
 }: TcoTableProps) {
   return (
@@ -191,6 +198,7 @@ export function TcoTable({
           stats={stats}
           llmCalculations={llmCalculations}
           computeResourcePages={computeResourcePages}
+          infrastructureColumnKey={infrastructureColumnKey}
           exchangeRate={exchangeRate}
         />
         <TcoBlock
@@ -201,6 +209,7 @@ export function TcoTable({
           stats={stats}
           llmCalculations={llmCalculations}
           computeResourcePages={computeResourcePages}
+          infrastructureColumnKey={infrastructureColumnKey}
           exchangeRate={exchangeRate}
         />
       </div>

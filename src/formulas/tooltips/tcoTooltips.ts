@@ -1,8 +1,9 @@
 import {
   calculateInfrastructureCostTotal,
+  type InfrastructureCostColumnKey,
 } from '../../content/infrastructureCost';
 import type { DocumentStatisticsResult } from '../documentStatistics';
-import { formatDecimal, formatGrouped, formatUsd, namedField } from '../format';
+import { formatDecimal, namedField } from '../format';
 import {
   calculateInfrastructurePerPageUsd,
   calculateInfrastructurePerSubmissionUsd,
@@ -11,6 +12,7 @@ import type { LlmCalculationsResult } from '../llmCalculations';
 import {
   finalCostUsdTooltip,
 } from './llmCalculationsTooltips';
+import { avgInfrastructureCostPerPageTooltip } from './infrastructureCostTooltips';
 import {
   calculateSupportOnlyFeePerPageUsd,
   serviceManagementPerSubmissionUsd,
@@ -39,8 +41,12 @@ export function llmGbpTooltip(
 export function infrastructureSubmissionUsdTooltip(
   stats: DocumentStatisticsResult,
   computeResourcePages: number,
+  infrastructureColumnKey: InfrastructureCostColumnKey,
 ): string {
-  const infrastructurePerPage = calculateInfrastructurePerPageUsd(computeResourcePages);
+  const infrastructurePerPage = calculateInfrastructurePerPageUsd(
+    computeResourcePages,
+    infrastructureColumnKey,
+  );
   return `${namedField('Infrastructure Costs (per page)', `${formatDecimal(infrastructurePerPage, 4)} USD`)} × ${namedField('One submission contains aprx. pages', stats.pagesPerSubmission)}`;
 }
 
@@ -56,9 +62,16 @@ export function infrastructureGbpTooltip(
   return `${namedField(label, `${formatDecimal(infrastructureUsd, 4)} USD`)} × ${namedField('Exchange rate', exchangeRate)}`;
 }
 
-export function infrastructurePageUsdTooltip(computeResourcePages: number): string {
+export function infrastructurePageUsdTooltip(
+  computeResourcePages: number,
+  infrastructureColumnKey: InfrastructureCostColumnKey,
+): string {
   const total = calculateInfrastructureCostTotal();
-  return `${namedField('[Prod] Cost per month (Saving plan) Total Price', formatUsd(total.prodSavingPlan))} / ${namedField('Compute resource pages', formatGrouped(computeResourcePages))}`;
+  return avgInfrastructureCostPerPageTooltip(
+    infrastructureColumnKey,
+    total[infrastructureColumnKey],
+    computeResourcePages,
+  );
 }
 
 export function serviceManagementSubmissionUsdTooltip(): string {
@@ -121,6 +134,7 @@ interface TcoTooltipContext {
   stats: DocumentStatisticsResult;
   llmCalculations: LlmCalculationsResult;
   computeResourcePages: number;
+  infrastructureColumnKey: InfrastructureCostColumnKey;
   variant: TcoVariant;
   metric: TcoMetric;
   llmUsd: number;
@@ -147,8 +161,15 @@ function usdTooltipForMetric(ctx: TcoTooltipContext): string {
         : llmPageUsdTooltip(llmCalculations.finalCostPerSubmissionUsd, stats);
     case 'infrastructure':
       return variant === 'submission'
-        ? infrastructureSubmissionUsdTooltip(stats, ctx.computeResourcePages)
-        : infrastructurePageUsdTooltip(ctx.computeResourcePages);
+        ? infrastructureSubmissionUsdTooltip(
+            stats,
+            ctx.computeResourcePages,
+            ctx.infrastructureColumnKey,
+          )
+        : infrastructurePageUsdTooltip(
+            ctx.computeResourcePages,
+            ctx.infrastructureColumnKey,
+          );
     case 'serviceManagement':
       return variant === 'submission'
         ? serviceManagementSubmissionUsdTooltip()
@@ -200,6 +221,7 @@ export function getTcoRowAmounts(
   stats: DocumentStatisticsResult,
   llmCalculations: LlmCalculationsResult,
   computeResourcePages: number,
+  infrastructureColumnKey: InfrastructureCostColumnKey,
 ) {
   const llmUsd =
     variant === 'submission'
@@ -212,8 +234,12 @@ export function getTcoRowAmounts(
       ? calculateInfrastructurePerSubmissionUsd(
           stats.pagesPerSubmission,
           computeResourcePages,
+          infrastructureColumnKey,
         )
-      : calculateInfrastructurePerPageUsd(computeResourcePages);
+      : calculateInfrastructurePerPageUsd(
+          computeResourcePages,
+          infrastructureColumnKey,
+        );
   const serviceManagementUsd =
     variant === 'submission'
       ? serviceManagementPerSubmissionUsd

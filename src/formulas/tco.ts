@@ -1,4 +1,5 @@
 import type { TokenPrices } from '../prices/types';
+import type { InfrastructureCostColumnKey } from '../content/infrastructureCost';
 import type { DocumentStatisticsResult } from './documentStatistics';
 import { usdToGbp, toGbp } from './exchangeRate';
 import {
@@ -52,6 +53,7 @@ export function calculateTco(
   prices: TokenPrices,
   exchangeRate: number = usdToGbp,
   computeResourcePages: number,
+  infrastructureColumnKey: InfrastructureCostColumnKey,
 ): TcoResult {
   const llm = calculateLlmCalculations(stats, prices, exchangeRate);
   const llmPerSubmissionUsd = llm.finalCostPerSubmissionUsd;
@@ -62,10 +64,12 @@ export function calculateTco(
 
   const infrastructurePerPageUsd = calculateInfrastructurePerPageUsd(
     computeResourcePages,
+    infrastructureColumnKey,
   );
   const infrastructurePerSubmissionUsd = calculateInfrastructurePerSubmissionUsd(
     stats.pagesPerSubmission,
     computeResourcePages,
+    infrastructureColumnKey,
   );
 
   const supportOnlyFeePerPageUsd = calculateSupportOnlyFeePerPageUsd(

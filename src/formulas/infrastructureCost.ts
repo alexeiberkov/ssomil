@@ -1,17 +1,22 @@
 import {
   calculateAvgInfrastructureCostPerPage,
-  defaultComputeResourcePages,
+  type InfrastructureCostColumnKey,
 } from '../content/infrastructureCost';
 
 export function calculateInfrastructurePerPageUsd(
-  computeResourcePages: number = defaultComputeResourcePages,
+  computeResourcePages: number,
+  columnKey: InfrastructureCostColumnKey,
 ): number {
-  return calculateAvgInfrastructureCostPerPage(computeResourcePages).prodSavingPlan;
+  return calculateAvgInfrastructureCostPerPage(computeResourcePages)[columnKey];
 }
 
 export function calculateInfrastructurePerSubmissionUsd(
   pagesPerSubmission: number,
-  computeResourcePages: number = defaultComputeResourcePages,
+  computeResourcePages: number,
+  columnKey: InfrastructureCostColumnKey,
 ): number {
-  return calculateInfrastructurePerPageUsd(computeResourcePages) * pagesPerSubmission;
+  return (
+    calculateInfrastructurePerPageUsd(computeResourcePages, columnKey) *
+    pagesPerSubmission
+  );
 }
