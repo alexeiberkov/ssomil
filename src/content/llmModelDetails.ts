@@ -13,7 +13,7 @@ export interface LlmModelDetail {
   pros: string;
   cons: string;
   bestUse: string;
-  myView: string;
+  epamView: string;
   references: LlmModelReference[];
 }
 
@@ -32,8 +32,8 @@ export const llmModelDetails: LlmModelDetail[] = [
       'More expensive than Haiku and GPT-5 on input. May be overkill for simple fields like dates, reference numbers, simple enumerations, or document classification. If used for every field/page, it can push extraction cost up, especially for 60-page average MRCs.',
     bestUse:
       'Use as primary high-accuracy extractor for complex fields, clause-level interpretation, ambiguous sections, fallback extraction, and judge/validator for low-confidence results.',
-    myView:
-      'Best quality-oriented Anthropic option. Good default for the “hard 20–30%” of LIMOSS extraction where BPO corrections are most costly.',
+    epamView:
+      'Our recommendation: best quality-oriented Anthropic option and a strong default for the “hard 20–30%” of LIMOSS extraction where BPO corrections are most costly.',
     references: [
       {
         label: 'Introducing Claude Sonnet 4.5 — Anthropic',
@@ -55,8 +55,8 @@ export const llmModelDetails: LlmModelDetail[] = [
       'Higher risk on subtle interpretation: complex coverage clauses, nested conditions, endorsements, inconsistent tables, or fields requiring domain reasoning. May produce more “looks plausible but wrong” values unless constrained by prompt, schema, validation rules and confidence thresholds.',
     bestUse:
       'Use as cost-efficient workhorse for classification, first-pass extraction of simple fields, page triage, document type routing, and pre-validation. Escalate low-confidence or business-critical fields to Sonnet/GPT-5.',
-    myView:
-      'Best cost-control option. I would not position it as the only model for LIMOSS, but it is very useful in a routed architecture.',
+    epamView:
+      'Our recommendation: best cost-control option. Not recommended as the sole model for LIMOSS, but highly useful in a routed architecture.',
     references: [
       {
         label: 'Introducing Claude Haiku 4.5 — Anthropic',
@@ -78,8 +78,8 @@ export const llmModelDetails: LlmModelDetail[] = [
       'It is no longer the most compelling cost/performance option compared with newer OpenAI models. For new implementation, it may look like a legacy baseline rather than forward-looking choice. Public OpenAI pricing pages now emphasize newer GPT-5.x models; third-party pricing summaries describe GPT-4o as legacy/grandfathered around $2.50 input / $10 output per 1M tokens, but this should be verified against the exact Azure/OpenAI contract used for LIMOSS.',
     bestUse:
       'Use as baseline / fallback / compatibility model if GPT-4o is already approved, stable in the client environment, or easier to procure through Azure OpenAI.',
-    myView:
-      'Safe but not the strongest strategic recommendation. I would avoid making GPT-4o the headline model unless procurement or Azure availability makes it necessary.',
+    epamView:
+      'Our recommendation: a safe fallback option, but not the primary strategic choice. GPT-4o should not be the headline model unless procurement or Azure availability requires it.',
     references: [
       {
         label: 'OpenAI API Pricing 2026 — PE Collective',
@@ -101,8 +101,8 @@ export const llmModelDetails: LlmModelDetail[] = [
       'Reasoning models may consume more output/reasoning tokens depending on configuration, so real cost must be benchmarked on LIMOSS samples rather than calculated only from input/output list price. Also, GPT-5 availability, data residency and Azure/OpenAI deployment model need to be checked for the specific LIMOSS environment. OpenAI’s current pricing page highlights newer GPT-5.4/5.5 lines and notes regional processing uplift for eligible data residency endpoints.',
     bestUse:
       'Use as primary OpenAI strategic model for complex extraction, validation, ACORD transformation checks, field consistency, and fallback for documents where Haiku/simple extraction is insufficient.',
-    myView:
-      'Best overall OpenAI choice if available in the target deployment. Strong argument for future-proofing and cost reduction versus older GPT-4o-style setup.',
+    epamView:
+      'Our recommendation: best overall OpenAI choice if available in the target deployment, with a strong case for future-proofing and cost reduction versus older GPT-4o-style setups.',
     references: [
       {
         label: 'GPT-5 is here — OpenAI',

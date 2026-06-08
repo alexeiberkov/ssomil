@@ -52,7 +52,7 @@ export function LlmCachingInfo({ modelId }: LlmCachingInfoProps) {
           <ModelDetailSection label="Pros for LIMOSS extraction">{model.pros}</ModelDetailSection>
           <ModelDetailSection label="Cons / risks for LIMOSS extraction">{model.cons}</ModelDetailSection>
           <ModelDetailSection label="Best use in DEPS">{model.bestUse}</ModelDetailSection>
-          <ModelDetailSection label="My view">{model.myView}</ModelDetailSection>
+          <ModelDetailSection label="EPAM view">{model.epamView}</ModelDetailSection>
         </article>
 
         {model.references.length > 0 && (
