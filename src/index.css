@@ -12,6 +12,83 @@ body {
   background: #fff;
 }
 
+.password-gate {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+  background: #fafafa;
+}
+
+.password-gate__card {
+  width: 100%;
+  max-width: 24rem;
+  padding: 1.5rem;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  background: #fff;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+.password-gate__title {
+  margin: 0 0 0.5rem;
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: #1a1a1a;
+}
+
+.password-gate__text {
+  margin: 0 0 1rem;
+  color: #555;
+  line-height: 1.45;
+}
+
+.password-gate__form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.password-gate__label {
+  font-weight: 700;
+  color: #444;
+}
+
+.password-gate__input {
+  padding: 0.55rem 0.65rem;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 14px;
+}
+
+.password-gate__input:focus {
+  outline: 2px solid rgba(232, 119, 34, 0.35);
+  border-color: #e87722;
+}
+
+.password-gate__error {
+  margin: 0;
+  font-size: 13px;
+  color: #b00020;
+}
+
+.password-gate__button {
+  margin-top: 0.35rem;
+  padding: 0.6rem 0.85rem;
+  border: none;
+  border-radius: 4px;
+  background: #e87722;
+  color: #fff;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.password-gate__button:hover {
+  background: #d06a1c;
+}
+
 .app {
   min-height: 100vh;
 }
