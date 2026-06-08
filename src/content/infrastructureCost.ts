@@ -17,7 +17,7 @@ export interface InfrastructureCostRow {
 export type InfrastructureCostColumnKey = keyof Omit<InfrastructureCostRow, 'service'>;
 
 export const defaultInfrastructureCostColumnKey: InfrastructureCostColumnKey =
-  'prodSavingPlan';
+  'combinedSavingPlan';
 
 export function getInfrastructureCostColumnLabel(
   columnKey: InfrastructureCostColumnKey,
